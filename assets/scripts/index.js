@@ -1,45 +1,85 @@
+// Initialiser la liste des tâches
+let listeDesTaches = [];
 
-// crétaion de l'objet tache
-const Tache = (title, description, date) => ({
-  title,
-  description,
-  date,
-  tacheCompleted: false,
-});
-
-//vérification de mon nombre de taches
-const nombreDeTaches = () => {
-  return listeDesTaches.length;
+// Fonction pour ajouter une tâche
+const ajouterUneTache = (title) => {
+  const nouvelleTache = {
+    id: Date.now(),
+    title,
+    completed: false,
+  };
+  listeDesTaches.push(nouvelleTache);
+  afficherTaches();
 };
 
-//vérifier si ma liste de taches est vide
-const estListeVide = () => {
-  return listeDesTaches.length === 0;
-}
+// Fonction pour afficher les tâches
+const afficherTaches = () => {
+  const itemList = document.querySelector('.item-list');
+  itemList.innerHTML = '';
 
-// initialisation de la liste des tâches 
-const listeDesTaches = []
-
-// Pour ajouter une nouvelle tache à la liste
-const ajouterUneTache = (title, description, date) => {
-  listeDesTaches.push(Tache(title, description, date));
+  listeDesTaches.forEach((tache, index) => {
+    const itemDiv = document.createElement('div');
+    itemDiv.classList.add('item', 'flex', 'justify-between', 'items-center', 'my-3', 'border-b', 'border-b-green-500', 'pb-1');
+    
+    itemDiv.innerHTML = `
+      <div class="flex gap-1 items-center">
+        <h6 class="item-index border border-green-500 rounded p-1">${index + 1}</h6>
+        <p class="item-name capitalize">${tache.title}</p>
+      </div>
+      <div class="items-icons">
+        <i class="far fa-check-circle cursor-pointer complete-item mx-2 items-icon text-green-500" onclick="completerTache(${tache.id})"></i>
+        <i class="far fa-edit cursor-pointer edit-item mx-2 items-icon" onclick="editerTache(${tache.id})"></i>
+        <i class="far fa-times-circle cursor-pointer delete-item mx-2 items-icon text-green-500" onclick="supprimerTache(${tache.id})"></i>
+      </div>
+    `;
+    itemList.appendChild(itemDiv);
+  });
 };
-ajouterUneTache("Développeur web", "créer des applications mobiles", "05-08-2001")
-ajouterUneTache("Marketeur Digital", "création des contenus instagram", "10-08-2024")
 
-// console.log(listeDesTaches);
+// Fonction pour supprimer une tâche
+const supprimerTache = (id) => {
+  listeDesTaches = listeDesTaches.filter(tache => tache.id !== id);
+  afficherTaches();
+};
 
-// supprimer une tache de la liste
-const supprimerUneTache = (index) => {
-  if (index >= 0 && index < listeDesTaches.length) {
-    listeDesTaches.splice(index, 1);
+// Fonction pour compléter une tâche
+const completerTache = (id) => {
+  listeDesTaches = listeDesTaches.map(tache => {
+    if (tache.id === id) {
+      return { ...tache, completed: !tache.completed };
+    }
+    return tache;
+  });
+  afficherTaches();
+};
+
+// Fonction pour éditer une tâche
+const editerTache = (id) => {
+  const nouveauTitre = prompt('Modifier la tâche :');
+  if (nouveauTitre) {
+    listeDesTaches = listeDesTaches.map(tache => {
+      if (tache.id === id) {
+        return { ...tache, title: nouveauTitre };
+      }
+      return tache;
+    });
+    afficherTaches();
   }
 };
-supprimerUneTache(0)
-console.log(listeDesTaches )
-//afficher toutes les taches
-const afficherTaches = () => {
-  listeDesTaches.forEach((tache, index) => {
-    console.log(`${index + 1}. ${tache.title} - ${tache.date}`);
-  });
-}
+
+// Gérer l'ajout de tâches via le formulaire
+document.getElementById('itemForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const itemInput = document.getElementById('itemInput');
+  const title = itemInput.value.trim();
+  if (title) {
+    ajouterUneTache(title);
+    itemInput.value = '';
+  }
+});
+
+// Supprimer toutes les tâches
+document.getElementById('clear-list').addEventListener('click', () => {
+  listeDesTaches = [];
+  afficherTaches();
+});
